@@ -36,7 +36,8 @@ function ProtectedPage() {
     });
 
     setFile(null);
-    setCount(count++)
+    setCount(++count)
+    console.log(count)
   };
   const s3 = new AWS.S3({
     accessKeyId: "",
