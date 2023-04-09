@@ -1,5 +1,6 @@
 import React, { useState,useEffect,useRef} from "react";
 import axios from "axios";
+import Link from "next/link";
 import AWS from 'aws-sdk';
 import styles from '../styles/ProtectedPage.module.css';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
@@ -107,9 +108,20 @@ function ProtectedPage() {
   <div className={styles.container}>
     {imageUrls.map((url) => (
       <React.Fragment key={url}>
-        <a href={url} className={styles.a}>
-          <img src={url} className={styles.img} alt="uploaded image"  />
-        </a>
+        {/* <a href={url} className={styles.a}>
+          import Link from 'next/link' */}
+
+      <Link
+        href={{
+          pathname: '/image',
+          query: {
+            imgname:url,
+          } // the data
+        }}
+      >
+      <img src={url} className={styles.img} alt="uploaded image"  />
+      </Link>
+
       </React.Fragment>
     ))}
   </div>
