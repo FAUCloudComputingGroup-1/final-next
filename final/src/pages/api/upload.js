@@ -1,4 +1,7 @@
 import S3 from "aws-sdk/clients/s3";
+import { withApiAuthRequired, getSession } from '@auth0/nextjs-auth0';
+
+
 
 const s3 = new S3({
   region: "us-east-1",
@@ -6,18 +9,16 @@ const s3 = new S3({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   signatureVersion: "v4",
 });
-
-export default async (req, res) => {
+ let handler=async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
-
   try {
     let { name, type } = req.body;
-
+    const session = await getSession(req, res);
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: name,
+      Key: session.user.sub+name,
       Expires: 600,
       ContentType: type,
     };
@@ -38,3 +39,4 @@ export const config = {
     },
   },
 };
+export default withApiAuthRequired(handler)

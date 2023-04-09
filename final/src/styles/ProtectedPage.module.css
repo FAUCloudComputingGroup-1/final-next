@@ -1,0 +1,21 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 200px);
+    grid-gap: 15px;
+    justify-content: center; /* horizontally center grid items */
+
+  }
+  
+.img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    max-width: 100%
+  }
+
+.a{
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+  
