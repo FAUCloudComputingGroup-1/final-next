@@ -41,8 +41,8 @@ function ProtectedPage() {
     console.log(count)
   };
   const s3 = new AWS.S3({
-    accessKeyId: "",
-    secretAccessKey: "",
+    accessKeyId: "AKIAWZATVY7MB4BXAOIG",
+    secretAccessKey: "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",
     region: "us-east-1",
   });
   
