@@ -14,7 +14,13 @@ const s3 = new S3({
     return res.status(405).json({ message: "Method not allowed" });
   }
   try {
-    let { name, type } = req.body;
+    let { name, type, height, width, size } = req.body;
+    console.log(name)
+    console.log(type)
+    console.log(height)
+    console.log(width)
+    console.log(size)
+
     const session = await getSession(req, res);
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
