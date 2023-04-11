@@ -40,49 +40,26 @@ function ProtectedPage() {
     setCount(++count)
     console.log(count)
   };
-  const s3 = new AWS.S3({
-    accessKeyId: "AKIAWZATVY7MB4BXAOIG",
-    secretAccessKey: "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",
-    region: "us-east-1",
-  });
-  
-  const getImageUrlsFromS3 = async () => {
-    const params = {
-      Bucket: 'chefomardee-testing',
-    };
-  
-    try {
-      const response = await s3.listObjectsV2(params).promise();
-      var images = response.Contents.filter((file) =>
-        file.Key.startsWith(user.sub) &&
-          ['.jpg', '.jpeg', '.png', '.gif'].includes(
-            file.Key.substring(file.Key.lastIndexOf('.'))
-          )
-        );         
-  
-      const imageUrls = images.map((image) =>
-        s3.getSignedUrl('getObject', {
-          Bucket: params.Bucket,
-          Key: image.Key,
-        })
-      );
-      console.log(imageUrls)
-      return imageUrls;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
 
-  useEffect(() => {
-    async function fetchData() {
-      if(user){
-        const urls = await getImageUrlsFromS3();
-        setImageUrls(urls);
+  async function fetchData() {
+    if (user) {
+      try {
+        const response = await axios.get('/api/getimage', {
+          params: {
+            userSub: user.sub,
+          },
+        });
+        setImageUrls(response.data);
+      } catch (error) {
+        console.error(error);
+        setImageUrls([]);
       }
     }
+  }
+
+  useEffect(() => {
     fetchData();
-  }, [user, count]);
+  }, [count,user]);
 
   return (
 <div className="container flex items-center p-4 mx-auto min-h-screen justify-center">
