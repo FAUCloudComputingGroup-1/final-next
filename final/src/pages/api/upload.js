@@ -24,9 +24,10 @@ const s3 = new S3({
     const session = await getSession(req, res);
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: session.user.sub+name,
+      Key: name,
       Expires: 600,
       ContentType: type,
+      Tagging: `user=${session.user.sub}`
     };
 
     const url = await s3.getSignedUrlPromise("putObject", fileParams);

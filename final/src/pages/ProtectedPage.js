@@ -8,7 +8,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 function ProtectedPage() {
   var { isLoading , user, error}= useUser()
   let [count,setCount] = useState(0);
-  user?console.log(user):console.log("nothing yet")
+  // user?console.log(user):console.log("nothing yet")
   const [imageUrls, setImageUrls] = useState([]);
   const [file, setFile] = useState();
   const [uploadingStatus, setUploadingStatus] = useState();
@@ -47,25 +47,38 @@ function ProtectedPage() {
   const uploadFile = async () => {
     setUploadingStatus("Uploading the file to AWS S3");
     
-    let { data } = await axios.post("/api/upload", {
-      name: file.name,
-      type: file.type,
-      width:imgMetaWidth,
-      height:imgMetaHeight,
-      size:imgMetaSize
-    });
+    
+let { data } = await axios.post("/api/upload", {
+  name: file.name,
+  type: file.type,
+  width:imgMetaWidth,
+  height:imgMetaHeight,
+  size:imgMetaSize
+});
 
-    console.log(data);
+console.log(data);
+if(user.sub){
+  const url = data.url;
+  console.log(typeof user.sub)
+  console.log(user.sub)
+  const tags = { "user": user.sub.replace('|','') }; // Add the "chef" and "omar" tags
+  const tagString = Object.keys(tags)
+    .map((key) => `${(key)}=${(tags[key])}`)
+    .join("&");
+  let { data: newData } = await axios.put(url, file, {
+    headers: {
+      "Content-type": file.type,
+      "Access-Control-Allow-Origin": "*",
+      "x-amz-tagging": tagString // Add the "x-amz-tagging" header with the tag string
+  },
+  });
+}
 
-    const url = data.url;
-    let { data: newData } = await axios.put(url, file, {
-      headers: {
-        "Content-type": file.type,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+
 
     setFile(null);
+    // "x-amz-meta-name": encodeURIComponent(user.sub) // Add the tag as metadata
+
     setCount(++count)
     console.log(count)
   };
