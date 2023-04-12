@@ -14,19 +14,37 @@ export default async (req, res) => {
   const params = {
     Bucket: 'chefomardee-testing',
   };
-  
+
   try {
     const response = await s3.listObjectsV2(params).promise();
-    var images = response.Contents.filter((file) =>
-      file.Key.startsWith(req.query.userSub) &&
-      ['.jpg', '.jpeg', '.png', '.gif'].includes(
-        file.Key.substring(file.Key.lastIndexOf('.'))
-      )
-    );         
-    const imageUrls = images.map((image) =>
+    const objects = response.Contents;
+
+    // Get tags for all objects in parallel
+    const objectsWithTagPromises = objects.map((object) =>
+      s3.getObjectTagging({
+        Bucket: params.Bucket,
+        Key: object.Key,
+      }).promise().then(tagsResponse => {
+        const tags = tagsResponse.TagSet;
+        return {
+          ...object,
+          tags,
+        };
+      })
+    );
+
+    const objectsWithTag = await Promise.all(objectsWithTagPromises);
+
+    // Filter objects by tag value
+    const filteredObjects = objectsWithTag.filter((object) =>
+      object.tags.some((tag) => tag.Value === (req.query.userSub).replace('|',''))
+    );
+
+    // Generate signed URLs for filtered objects
+    const imageUrls = filteredObjects.map((object) =>
       s3.getSignedUrl('getObject', {
         Bucket: params.Bucket,
-        Key: image.Key,
+        Key: object.Key,
       })
     );
     res.json(imageUrls);
