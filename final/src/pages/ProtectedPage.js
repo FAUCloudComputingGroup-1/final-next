@@ -1,121 +1,117 @@
-import React, { useState,useEffect,useRef} from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
-import styles from '../styles/ProtectedPage.module.css';
-import { withPageAuthRequired } from '@auth0/nextjs-auth0';
-import { useUser } from '@auth0/nextjs-auth0/client';
+import styles from "../styles/ProtectedPage.module.css";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 function ProtectedPage() {
-  var { isLoading , user, error}= useUser()
-  let [count,setCount] = useState(0);
-  // user?console.log(user):console.log("nothing yet")
   const [imageUrls, setImageUrls] = useState([]);
-  const [file, setFile] = useState();
-  const [uploadingStatus, setUploadingStatus] = useState();
-  const [imgMetaHeight, setImageMetaHeight]=useState();
-  const [imgMetaWidth, setImageMetaWidth]=useState();
-  const [imgMetaSize, setMetaImageMetaSize]=useState();
-
-
-  
+  const [file, setFile] = useState(null);
+  const [uploadingStatus, setUploadingStatus] = useState("");
+  const [imgMeta, setImgMeta] = useState({ height: null, width: null, size: null });
+  const [count, setCount] = useState(0);
+  const { user, error, isLoading } = useUser();
+  const [isReady, setIsReady] = useState(false);
 
   const selectFile = (e) => {
-    setFile(e.target.files[0]);
-    const file = e.target.files[0];
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
     const reader = new FileReader();
-  
-    reader.onload = (event) => {
+    reader.readAsDataURL(selectedFile);
+    reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const { size } = file;
+        const { size } = selectedFile;
         const { width, height } = img;
-        const storageSize = event.total; // total bytes of the loaded file
-        
+        const storageSize = reader.result.length;
+        setImgMeta({ height, width, size });
         console.log(`Size: ${size} bytes`);
         console.log(`Width: ${width}px`);
         console.log(`Height: ${height}px`);
         console.log(`Storage Size: ${storageSize} bytes`);
-        setImageMetaHeight(height)
-        setImageMetaWidth(width)
-        setMetaImageMetaSize(size)
       };
-      img.src = event.target.result;
+      img.src = reader.result;
     };
-    reader.readAsDataURL(file);  
   };
-  
   const uploadFile = async () => {
+    if (!file) return;
     setUploadingStatus("Uploading the file to AWS S3");
-    
-    
-let { data } = await axios.post("/api/upload", {
-  name: file.name,
-  type: file.type,
-  width:imgMetaWidth,
-  height:imgMetaHeight,
-  size:imgMetaSize
-});
-
-console.log(data);
-if(user.sub){
-  const url = data.url;
-  console.log(typeof user.sub)
-  console.log(user.sub)
-  const tags = { "user": user.sub.replace('|','') }; // Add the "chef" and "omar" tags
-  const tagString = Object.keys(tags)
-    .map((key) => `${(key)}=${(tags[key])}`)
-    .join("&");
-  let { data: newData } = await axios.put(url, file, {
-    headers: {
-      "Content-type": file.type,
-      "Access-Control-Allow-Origin": "*",
-      "x-amz-tagging": tagString // Add the "x-amz-tagging" header with the tag string
-  },
-  });
-}
-
-
-
-    setFile(null);
-    // "x-amz-meta-name": encodeURIComponent(user.sub) // Add the tag as metadata
-
-    setCount(++count)
-    console.log(count)
-  };
-
-  async function fetchData() {
-    if (user) {
-      try {
-        const response = await axios.get('/api/getimage', {
-          params: {
-            userSub: user.sub,
-          },
-        });
-        setImageUrls(response.data);
-      } catch (error) {
-        console.error(error);
-        setImageUrls([]);
-      }
+    const { data } = await axios.post("/api/upload", {
+      name: file.name,
+      type: file.type,
+      ...imgMeta,
+    });
+    if (user?.sub) {
+      const url = data.url;
+      console.log(user.sub);
+      const tags = { user: user.sub.replace("|", "") };
+      const tagString = Object.entries(tags)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("&");
+      await axios.put(url, file, {
+        headers: {
+          "Content-type": file.type,
+          "Access-Control-Allow-Origin": "*",
+          "x-amz-tagging": tagString,
+        },
+      });
     }
-  }
-
+    setFile(null);
+    setImgMeta({ height: null, width: null, size: null });
+    setCount((prev) => prev + 1);
+  };
   useEffect(() => {
-    fetchData();
-  }, [count,user]);
+    if (user) {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get("/api/getimage", {
+            params: {
+              userSub: user.sub,
+            },
+          });
+          setImageUrls(response.data);
+          setIsReady(true);
+        } catch (error) {
+          console.error(error);
+          setImageUrls([]);
+          setIsReady(true);
+        }
+      };
+      fetchData();
+    }
+  }, [count, user]);
+
+  const renderedImageUrls = useMemo(() => {
+    return imageUrls.map((url) => (
+      <React.Fragment key={url}>
+        <Link
+          href={{
+            pathname: '/image',
+            query: {
+              imgname: url,
+            } // the data
+          }}
+        >
+          <img src={url} className={styles.img} alt="uploaded image"  />
+        </Link>
+      </React.Fragment>
+    ));
+  }, [imageUrls]);
 
   return (
-<div className="container flex items-center p-4 mx-auto min-h-screen justify-center">
-  {/* File Upload Section */}
-  <main>
-    <p>Please select a file to upload</p>
-    <input type="file" onChange={(e) => selectFile(e)} />
-    {file && (
-      <>
-        <p>Selected file: {file.name}</p>
-        <button
-          onClick={uploadFile}
-          className=" bg-purple-500 text-white p-2 rounded-sm shadow-md hover:bg-purple-700 transition-all"
-        >
+    <div className="container flex items-center p-4 mx-auto min-h-screen justify-center">
+      {/* File Upload Section */}
+      <main>
+        <p>Please select a file to upload</p>
+        <input type="file" onChange={selectFile} />
+        {file && (
+          <>
+            <p>Selected file: {file.name}</p>
+            <button
+              onClick={uploadFile}
+              className=" bg-purple-500 text-white p-2 rounded-sm shadow-md hover:bg-purple-700 transition-all"
+            >
           Upload a File!
         </button>
       </>
@@ -123,24 +119,19 @@ if(user.sub){
     {uploadingStatus && <p>{uploadingStatus}</p>}
   </main>
 
-  {/* Uploaded Images Section */}
   <div className={styles.container}>
-    {imageUrls.map((url) => (
+    {isReady && imageUrls.map((url) => (
       <React.Fragment key={url}>
-        {/* <a href={url} className={styles.a}>
-          import Link from 'next/link' */}
-
       <Link
         href={{
           pathname: '/image',
           query: {
             imgname:url,
-          } // the data
+          } 
         }}
       >
       <img src={url} className={styles.img} alt="uploaded image"  />
       </Link>
-
       </React.Fragment>
     ))}
   </div>

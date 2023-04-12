@@ -1,4 +1,3 @@
-import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import mongoose from 'mongoose';
 
 mongoose.connect("mongodb+srv://chefomardee:211473Ok@chefcluster.cq71b3r.mongodb.net/?retryWrites=true&w=majority");
@@ -12,12 +11,12 @@ const metadataSchema = new mongoose.Schema({
   user: String,
 }, { collection: 'chefomardee-testing' });
 
-const modelName = 'nim';
-let img;
+const modelName = 'von';
+let imag;
 if (mongoose.models[modelName]) {
-  img = mongoose.model(modelName);
+  imag = mongoose.model(modelName);
 } else {
-  img = mongoose.model(modelName, metadataSchema);
+  imag = mongoose.model(modelName, metadataSchema);
 }
 
 export default async function handler(req, res) {
@@ -28,24 +27,17 @@ export default async function handler(req, res) {
     console.log("babie")
 
     const startIndex = url.lastIndexOf("/") + 1;
-
     // Get the index of the first character after the file name
     const endIndex = url.indexOf("?");
-    
     // Extract the file name
     const fileName = url.substring(startIndex, endIndex);
 
-    const bucketParams = { Bucket: "chefomardee-testing", Key:fileName };
-    const client = new S3Client({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: 'us-east-1',
-    });
+
     console.log(fileName);
     const data = await client.send(new DeleteObjectCommand(bucketParams));
     console.log("Success. Object deleted.", data);
-    await img.deleteOne({ name:fileName});
-    res.status(200).json({ success: true, message: "Object deleted.", height });
+    let meta=await imag.findOne({ name:fileName});
+    res.status(200).json({ success: true, message: "Object deleted.", obj:meta});
   } catch (err) {
     console.log("Error", err);
     res.status(500).json({ success: false, error: err.message });
