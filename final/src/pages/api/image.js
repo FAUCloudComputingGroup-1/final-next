@@ -47,7 +47,7 @@ async function handler(req, res) {
     const data = await client.send(new DeleteObjectCommand(bucketParams));
     console.log("Success. Object deleted.", data);
     await img.deleteOne({ name:fileName});
-    res.status(200).json({ success: true, message: "Object deleted.", height });
+    res.status(200).json({ success: true, message: "Object deleted." });
   } catch (err) {
     console.log("Error", err);
     res.status(500).json({ success: false, error: err.message });
