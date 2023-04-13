@@ -1,5 +1,6 @@
-const AWS = require('aws-sdk');
+import { withApiAuthRequired } from '@auth0/nextjs-auth0';
 
+const AWS = require('aws-sdk');
 // configure AWS SDK
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -10,7 +11,7 @@ AWS.config.update({
 // create S3 instance
 const s3 = new AWS.S3();
 
-export default async (req, res) => {
+let handler= async (req, res) => {
   const params = {
     Bucket: 'chefomardee-testing',
   };
@@ -53,3 +54,4 @@ export default async (req, res) => {
     res.json([]);
   }
 };
+export default withApiAuthRequired(handler)

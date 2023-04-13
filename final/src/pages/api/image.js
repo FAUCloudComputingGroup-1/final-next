@@ -1,5 +1,7 @@
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import mongoose from 'mongoose';
+import { withApiAuthRequired } from '@auth0/nextjs-auth0';
+
 
 mongoose.connect("mongodb+srv://chefomardee:211473Ok@chefcluster.cq71b3r.mongodb.net/?retryWrites=true&w=majority");
 
@@ -20,7 +22,7 @@ if (mongoose.models[modelName]) {
   img = mongoose.model(modelName, metadataSchema);
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     let url = req.query.url;
     console.log("bhad")
@@ -51,3 +53,4 @@ export default async function handler(req, res) {
     res.status(500).json({ success: false, error: err.message });
   }
 }
+export default withApiAuthRequired(handler)

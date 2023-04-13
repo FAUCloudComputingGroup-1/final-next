@@ -34,11 +34,6 @@ if (mongoose.models[modelName]) {
   }
   try {
     let { name, type, height, width, size } = req.body;
-    console.log(name)
-    console.log(type)
-    console.log(height)
-    console.log(width)
-    console.log(size)
 
     const session = await getSession(req, res);
     const fileParams = {
@@ -52,10 +47,6 @@ if (mongoose.models[modelName]) {
     const url = await s3.getSignedUrlPromise("putObject", fileParams);
     
     let tru = `https://chefomardee-testing.s3.amazonaws.com/${name}`;
-    console.log("hey")
-    console.log(tru)
-    console.log("mamas")
-
 
     const newImage = new Image({
       size:size,
