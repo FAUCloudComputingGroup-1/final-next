@@ -17,7 +17,6 @@ let Home=()=> {
   }
   return (
     <React.Fragment>
-    {/* <button onClick={loginHandler}>Login</button> */}
     { user ? (
       <React.Fragment>
       <p>welcome: {user.name}</p> <img src={user.picture} alt="BigCo Inc.logo"/>
