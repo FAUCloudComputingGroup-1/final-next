@@ -17,6 +17,7 @@ function ProtectedPage() {
   const selectFile = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
+    console.log(file)
     const reader = new FileReader();
     reader.readAsDataURL(selectedFile);
     reader.onload = () => {
@@ -60,6 +61,7 @@ function ProtectedPage() {
     setFile(null);
     setImgMeta({ height: null, width: null, size: null });
     setCount((prev) => prev + 1);
+    setUploadingStatus("Uploaded")
   };
   useEffect(() => {
     if (user) {
@@ -105,9 +107,18 @@ function ProtectedPage() {
     <main className={styles.fileUpload}>
       <p className={styles.selectFile}>Please select a file to upload</p>
       <p className={styles.selectFile}>You may click any image to look at its meta data as well as look at options such as deleting and downloading</p>
-
-      <input type="file" onChange={selectFile} />
-      <span className={styles.fileInputText}></span>
+      <br></br>
+      <div className={styles.inputWrapper}>
+        <input
+          id="inputFile"
+          type="file"
+          onChange={selectFile}
+          className={styles.input}
+        />
+        <center><button className={styles.button}>Choose File</button></center>
+        <br></br>
+        <span className="file-name">{file ? file.name : ""}</span>
+      </div>
       {file && (
         <React.Fragment>
            <button

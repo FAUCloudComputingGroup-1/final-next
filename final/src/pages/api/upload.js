@@ -34,8 +34,10 @@ if (mongoose.models[modelName]) {
   }
   try {
     let { name, type, height, width, size } = req.body;
+    let tru = `https://chefomardee-testing.s3.amazonaws.com/${name}`;
 
     const session = await getSession(req, res);
+    console.log(await Image.deleteOne({ _id:tru}))
     const fileParams = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: name,
@@ -46,7 +48,6 @@ if (mongoose.models[modelName]) {
 
     const url = await s3.getSignedUrlPromise("putObject", fileParams);
     
-    let tru = `https://chefomardee-testing.s3.amazonaws.com/${name}`;
 
     const newImage = new Image({
       size:size,
@@ -60,7 +61,7 @@ if (mongoose.models[modelName]) {
     res.status(200).json({ url });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ message: err });
+    res.status(400).json({ message: "image already exists" });
   }
 };
 

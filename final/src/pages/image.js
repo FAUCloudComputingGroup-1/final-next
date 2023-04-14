@@ -12,6 +12,22 @@ let image = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [url, setURL] = useState(data.imgname);
     const [imageMeta, setImageMeta] = useState(null);
+    
+    const handleDownload = () => {
+      if(imageMeta?.name){
+        fetch(imageMeta?.name)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const url = window.URL.createObjectURL(new Blob([blob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', imageMeta?.name);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+          });
+        }
+      }
 
     const handleClick = async () => {
         setIsDeleting(true);
@@ -40,12 +56,17 @@ let image = () => {
 
     return (
       <div className={styles.container}>
-        <Link href="/ProtectedPage">
-  <span className={`${styles.navlink} ${styles.button}`}>
-    Back
-  </span>
-</Link>
-<br></br>
+        <div className={styles.buttonWrapper}>
+          <Link href="/ProtectedPage">
+            <span className={`${styles.button} ${styles.downloadButton}`}>
+              Back
+            </span>
+          </Link>
+          <br></br>
+          <button className={`${styles.button} ${styles.downloadButton}`} onClick={handleDownload}>Download Image</button>
+          <br></br>
+          <button className={`${styles.button} ${styles.deleteButton}`} onClick={handleClick}>{isDeleting ? "Deleting..." : "Delete Object"}</button>
+        </div>
         <div className={styles.imageWrapper}>
           <img
             src={data.imgname}
@@ -56,14 +77,15 @@ let image = () => {
           />
         </div>
         <div className={styles.metaData}>
-            <p>image size: {imageMeta?.size} bytes</p>
-            <p>image name: {imageMeta?.name} </p>
-            <p>image width: {imageMeta?.width} pixels</p>
-            <p>image height: {imageMeta?.height} pixels</p>        
+          <p>image size: {imageMeta?.size} bytes</p>
+          <p>image name: {imageMeta?.name} </p>
+          <p>image width: {imageMeta?.width} pixels</p>
+          <p>image height: {imageMeta?.height} pixels</p>
         </div>
-        <button className={styles.button} onClick={handleClick}>{isDeleting ? "Deleting..." : "Delete Object"}</button>
       </div>
+
     );
+    
 }
 
 export const getServerSideProps = withPageAuthRequired()
