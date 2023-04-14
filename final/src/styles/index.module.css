@@ -1,0 +1,49 @@
+.container {
+    background-color: #e6e6fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  .userImage {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  
+  .imageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem 0;
+  }
+  
+  .userName {
+    font-size: 2rem;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .logoutButton,
+  .loginButton {
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    background-color: #4b0082;
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1rem;
+  }
+  
+  .logoutButton:hover,
+  .loginButton:hover {
+    background-color: #fff;
+    color: #4b0082;
+  }
+  

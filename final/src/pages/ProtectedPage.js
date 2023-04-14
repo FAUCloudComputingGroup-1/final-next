@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import Link from "next/link";
 import styles from "../styles/ProtectedPage.module.css";
@@ -101,41 +101,49 @@ function ProtectedPage() {
 
   return (
     <div className="container flex items-center p-4 mx-auto min-h-screen justify-center">
-      {/* File Upload Section */}
-      <main>
-        <p>Please select a file to upload</p>
-        <input type="file" onChange={selectFile} />
-        {file && (
-          <>
-            <p>Selected file: {file.name}</p>
-            <button
-              onClick={uploadFile}
-              className=" bg-purple-500 text-white p-2 rounded-sm shadow-md hover:bg-purple-700 transition-all"
-            >
-          Upload a File!
-        </button>
-      </>
-    )}
-    {uploadingStatus && <p>{uploadingStatus}</p>}
-  </main>
+    {/* File Upload Section */}
+    <main className={styles.fileUpload}>
+      <p className={styles.selectFile}>Please select a file to upload</p>
+      <p className={styles.selectFile}>You may click any image to look at its meta data as well as look at options such as deleting and downloading</p>
 
-  <div className={styles.container}>
-    {isReady && imageUrls.map((url) => (
-      <React.Fragment key={url}>
-      <Link
-        href={{
-          pathname: '/image',
-          query: {
-            imgname:url,
-          } 
-        }}
-      >
-      <img src={url} className={styles.img} alt="uploaded image"  />
-      </Link>
-      </React.Fragment>
-    ))}
+      <input type="file" onChange={selectFile} />
+      <span className={styles.fileInputText}></span>
+      {file && (
+        <React.Fragment>
+           <button
+            onClick={uploadFile}
+            className={styles.button}
+          >
+            Upload a File!
+          </button>
+        </React.Fragment>
+      )}
+      {uploadingStatus && <p>{uploadingStatus}</p>}
+    </main>
+
+    <div className={styles.container}>
+      {isReady &&
+        imageUrls.map((url) => (
+          <React.Fragment key={url}>
+            <Link
+              href={{
+                pathname: '/image',
+                query: {
+                  imgname: url,
+                },
+              }}
+            >
+              <img
+                src={url}
+                className={styles.img}
+                alt="uploaded image"
+              />
+            </Link>
+          </React.Fragment>
+        ))}
+    </div>
   </div>
-</div>
+
   );
 }
 export const getServerSideProps = withPageAuthRequired()

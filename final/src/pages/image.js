@@ -2,6 +2,8 @@ import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import { useRouter } from 'next/router'
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import styles from '../styles/image.module.css';
+import Link from 'next/link';
 
 
 let image = () => {
@@ -37,16 +39,31 @@ let image = () => {
     }, []);
 
     return (
-        <React.Fragment>
-            <img src={data.imgname} alt="uploaded image" />
+      <div className={styles.container}>
+        <Link href="/ProtectedPage">
+  <span className={`${styles.navlink} ${styles.button}`}>
+    Back
+  </span>
+</Link>
+<br></br>
+        <div className={styles.imageWrapper}>
+          <img
+            src={data.imgname}
+            alt="Medium sized image"
+            width={300}
+            height={300}
+            className={styles.image}
+          />
+        </div>
+        <div className={styles.metaData}>
             <p>image size: {imageMeta?.size} bytes</p>
             <p>image name: {imageMeta?.name} </p>
             <p>image width: {imageMeta?.width} pixels</p>
-            <p>image height: {imageMeta?.height} pixels</p>
-
-            <button onClick={handleClick}>{isDeleting ? "Deleting..." : "Delete Object"}</button>
-        </React.Fragment>
-    )
+            <p>image height: {imageMeta?.height} pixels</p>        
+        </div>
+        <button className={styles.button} onClick={handleClick}>{isDeleting ? "Deleting..." : "Delete Object"}</button>
+      </div>
+    );
 }
 
 export const getServerSideProps = withPageAuthRequired()
