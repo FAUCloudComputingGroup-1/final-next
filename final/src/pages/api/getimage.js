@@ -3,8 +3,8 @@ import { withApiAuthRequired } from '@auth0/nextjs-auth0';
 const AWS = require('aws-sdk');
 // configure AWS SDK
 AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env._ACCESS_KEY_ID,
+  secretAccessKey: process.env._SECRET_ACCESS_KEY,
   region: 'us-east-1',
 });
 

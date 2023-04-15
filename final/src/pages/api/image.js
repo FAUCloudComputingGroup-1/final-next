@@ -39,8 +39,8 @@ async function handler(req, res) {
 
     const bucketParams = { Bucket: "chefomardee-testing", Key:fileName };
     const client = new S3Client({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: process.env._ACCESS_KEY_ID,
+      secretAccessKey: process.env._SECRET_ACCESS_KEY,
       region: 'us-east-1',
     });
     console.log(fileName);
